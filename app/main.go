@@ -6,7 +6,7 @@ import (
 import "github.com/gorilla/mux"
 
 func main() {
-	environmentService := &EnvironmentService{}
+	environmentService := createEnvironmentService()
 	configController := &ConfigController{
 		environmentService: *environmentService,
 	}

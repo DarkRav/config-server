@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -16,7 +18,8 @@ func (controller *ConfigController) GetConfigs(writer http.ResponseWriter, reque
 
 	configs, err := controller.environmentService.getConfigs(application, profile)
 	if err != nil {
-		writeResponse(writer, 500, err.Error())
+		log.Print(err.Error())
+		writeErrorResponse(writer, 500, err.Error())
 		return
 	}
 	writeResponse(writer, 200, configs)
@@ -28,7 +31,15 @@ func getRequestParamValue(request *http.Request, param string) string {
 	return value
 }
 
+func writeErrorResponse(writer http.ResponseWriter, status int, body string) {
+	errorBody := make(map[string]string)
+	errorBody["error"] = body
+	errorBodyJson, _ := json.Marshal(errorBody)
+	writeResponse(writer, 500, string(errorBodyJson))
+}
+
 func writeResponse(writer http.ResponseWriter, status int, body string) {
+	writer.Header().Add("Content-Type", "application/json")
 	writer.WriteHeader(status)
 	io.WriteString(writer, body)
 }
